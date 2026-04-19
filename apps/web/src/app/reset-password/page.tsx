@@ -1,22 +1,44 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
+import Link from "next/link";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import Link from "next/link";
 import api from "@/services/api";
 
-export default function ForgotPassPage() {
-  const [email, setEmail] = useState("");
+function ResetPasswordForm() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const token = searchParams.get("token");
+
+  const [password, setPassword] = useState("");
+  const [confirm, setConfirm] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [sent, setSent] = useState(false);
+  const [success, setSuccess] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!email) {
-      setError("Preencha o campo de e-mail.");
+
+    if (!password || !confirm) {
+      setError("Preencha todos os campos.");
+      return;
+    }
+
+    if (password.length < 6) {
+      setError("A senha deve ter pelo menos 6 caracteres.");
+      return;
+    }
+
+    if (password !== confirm) {
+      setError("As senhas não coincidem.");
+      return;
+    }
+
+    if (!token) {
+      setError("Token inválido.");
       return;
     }
 
@@ -24,10 +46,18 @@ export default function ForgotPassPage() {
     setError("");
 
     try {
-      await api.post("/api/auth/forgot-password", { email });
-      setSent(true);
-    } catch {
-      setError("Erro ao conectar com o servidor.");
+      await api.post("/api/auth/reset-password", {
+        token,
+        newPassword: password,
+      });
+      setSuccess(true);
+      setTimeout(() => router.push("/"), 3000);
+    } catch (err: any) {
+      if (err.response?.status === 400) {
+        setError("Link inválido ou expirado. Solicite um novo.");
+      } else {
+        setError("Erro ao conectar com o servidor.");
+      }
     } finally {
       setIsLoading(false);
     }
@@ -35,7 +65,7 @@ export default function ForgotPassPage() {
 
   return (
     <div className="min-h-screen flex bg-[#F5F1E6]">
-      {/* Painel esquerdo decorativo */}
+      {/* Painel esquerdo */}
       <div
         className="hidden lg:flex lg:w-1/2 relative flex-col justify-between p-12 overflow-hidden"
         style={{ backgroundColor: "#2C1A0E" }}
@@ -44,11 +74,8 @@ export default function ForgotPassPage() {
           className="absolute inset-0 opacity-10"
           style={{
             backgroundImage: `repeating-linear-gradient(
-              45deg,
-              transparent,
-              transparent 20px,
-              rgba(255,255,255,0.03) 20px,
-              rgba(255,255,255,0.03) 40px
+              45deg, transparent, transparent 20px,
+              rgba(255,255,255,0.03) 20px, rgba(255,255,255,0.03) 40px
             )`,
           }}
         />
@@ -58,13 +85,6 @@ export default function ForgotPassPage() {
             background: "radial-gradient(circle, #8B5E3C 0%, transparent 70%)",
           }}
         />
-        <div
-          className="absolute -top-20 -right-20 w-[300px] h-[300px] rounded-full opacity-10"
-          style={{
-            background: "radial-gradient(circle, #4A7C59 0%, transparent 70%)",
-          }}
-        />
-
         <div className="relative z-10">
           <Image
             src="/images/sigma.png"
@@ -74,7 +94,6 @@ export default function ForgotPassPage() {
             priority
           />
         </div>
-
         <div className="relative z-10 space-y-6">
           <div
             className="w-12 h-1 rounded-full"
@@ -88,16 +107,14 @@ export default function ForgotPassPage() {
               letterSpacing: "-0.02em",
             }}
           >
-            Recupere seu
+            Crie uma nova
             <br />
-            <span style={{ color: "#A0C878" }}>acesso ao sistema</span>
+            <span style={{ color: "#A0C878" }}>senha segura</span>
           </h2>
           <p className="text-base leading-relaxed" style={{ color: "#B8A898" }}>
-            Enviaremos um link de redefinição para o e-mail cadastrado na sua
-            conta.
+            Escolha uma senha forte para proteger sua conta no sistema.
           </p>
         </div>
-
         <div className="relative z-10">
           <p className="text-xs" style={{ color: "#6B5040" }}>
             © 2026 Sigma · Sistema de Gestão de Madeireiras
@@ -105,10 +122,9 @@ export default function ForgotPassPage() {
         </div>
       </div>
 
-      {/* Painel direito — formulário */}
+      {/* Painel direito */}
       <div className="flex-1 flex items-center justify-center px-6 py-12">
         <div className="w-full max-w-md space-y-8">
-          {/* Logo mobile */}
           <div className="flex justify-center lg:hidden">
             <Image
               src="/images/sigma.png"
@@ -119,20 +135,18 @@ export default function ForgotPassPage() {
             />
           </div>
 
-          {/* Cabeçalho */}
           <div className="space-y-1 text-center lg:text-left">
             <h1
               className="text-2xl font-bold"
               style={{ color: "#2C1A0E", fontFamily: "Georgia, serif" }}
             >
-              Esqueceu a senha?
+              Redefinir senha
             </h1>
             <p className="text-sm" style={{ color: "#7A6555" }}>
-              Informe seu e-mail e enviaremos as instruções de recuperação.
+              Digite sua nova senha abaixo.
             </p>
           </div>
 
-          {/* Card */}
           <div
             className="rounded-2xl p-8 space-y-6"
             style={{
@@ -142,8 +156,7 @@ export default function ForgotPassPage() {
               border: "1px solid rgba(44,26,14,0.06)",
             }}
           >
-            {sent ? (
-              /* Estado de sucesso */
+            {success ? (
               <div className="text-center space-y-4 py-4">
                 <div
                   className="w-14 h-14 rounded-full flex items-center justify-center mx-auto"
@@ -168,15 +181,13 @@ export default function ForgotPassPage() {
                     className="font-semibold text-sm"
                     style={{ color: "#2C1A0E" }}
                   >
-                    E-mail enviado!
+                    Senha redefinida com sucesso!
                   </p>
                   <p
                     className="text-xs leading-relaxed"
                     style={{ color: "#7A6555" }}
                   >
-                    Verifique sua caixa de entrada em{" "}
-                    <span className="font-medium">{email}</span> e siga as
-                    instruções para redefinir sua senha.
+                    Você será redirecionado para o login em instantes...
                   </p>
                 </div>
                 <Link
@@ -187,31 +198,54 @@ export default function ForgotPassPage() {
                     boxShadow: "0 4px 14px rgba(45,106,79,0.35)",
                   }}
                 >
-                  Voltar ao login
+                  Ir para o login
                 </Link>
               </div>
             ) : (
-              /* Formulário */
               <form onSubmit={handleSubmit} className="space-y-5">
                 <div className="space-y-2">
                   <Label
-                    htmlFor="email"
+                    htmlFor="password"
                     className="text-sm font-semibold"
                     style={{ color: "#3D2B1F" }}
                   >
-                    E-mail
+                    Nova senha
                   </Label>
                   <Input
-                    id="email"
-                    type="email"
-                    placeholder="seu@email.com"
-                    value={email}
+                    id="password"
+                    type="password"
+                    placeholder="••••••••"
+                    value={password}
                     onChange={(e) => {
-                      setEmail(e.target.value);
+                      setPassword(e.target.value);
                       setError("");
                     }}
-                    autoComplete="email"
-                    className="h-11 rounded-xl text-sm transition-all"
+                    className="h-11 rounded-xl text-sm"
+                    style={{
+                      borderColor: error ? "#DC2626" : "#E2D9CE",
+                      backgroundColor: "#FAFAF8",
+                    }}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label
+                    htmlFor="confirm"
+                    className="text-sm font-semibold"
+                    style={{ color: "#3D2B1F" }}
+                  >
+                    Confirmar senha
+                  </Label>
+                  <Input
+                    id="confirm"
+                    type="password"
+                    placeholder="••••••••"
+                    value={confirm}
+                    onChange={(e) => {
+                      setConfirm(e.target.value);
+                      setError("");
+                    }}
+                    className="h-11 rounded-xl text-sm"
                     style={{
                       borderColor: error ? "#DC2626" : "#E2D9CE",
                       backgroundColor: "#FAFAF8",
@@ -267,17 +301,17 @@ export default function ForgotPassPage() {
                           d="M4 12a8 8 0 018-8v8H4z"
                         />
                       </svg>
-                      Enviando...
+                      Salvando...
                     </>
                   ) : (
-                    "Enviar instruções"
+                    "Redefinir senha"
                   )}
                 </button>
 
                 <div className="text-center pt-1">
                   <Link
                     href="/"
-                    className="text-xs font-medium transition-colors hover:underline"
+                    className="text-xs font-medium hover:underline"
                     style={{ color: "#4A7C59" }}
                   >
                     ← Voltar ao login
@@ -289,5 +323,13 @@ export default function ForgotPassPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function ResetPasswordPage() {
+  return (
+    <Suspense>
+      <ResetPasswordForm />
+    </Suspense>
   );
 }
