@@ -6,6 +6,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import api from "@/services/api";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -14,17 +15,41 @@ export default function LoginPage() {
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+
     if (!email || !password) {
       setError("Preencha todos os campos.");
       return;
     }
+
     setIsLoading(true);
-    setTimeout(() => {
-      localStorage.setItem("sigma:user", JSON.stringify({ email }));
+    setError("");
+
+    try {
+      const response = await api.post("/api/auth/login", {
+        email,
+        password,
+      });
+
+      localStorage.setItem("user", JSON.stringify(response.data.user));
+
+      await new Promise((r) => setTimeout(r, 150));
+
       router.push("/dashboard");
-    }, 800);
+    } catch (err: any) {
+      setIsLoading(false);
+
+      if (err.response?.status === 401) {
+        setError("Email ou senha inválidos");
+      } else {
+        setError("Erro ao conectar com o servidor");
+      }
+
+      return;
+    }
+
+    setIsLoading(false);
   }
 
   return (
@@ -158,7 +183,7 @@ export default function LoginPage() {
                   value={email}
                   onChange={(e) => {
                     setEmail(e.target.value);
-                    setError("");
+                    if (error) setError("");
                   }}
                   autoComplete="email"
                   className="h-11 rounded-xl text-sm transition-all"
@@ -260,17 +285,6 @@ export default function LoginPage() {
               </button>
             </form>
           </div>
-
-          <p className="text-center text-xs" style={{ color: "#A89888" }}>
-            Problemas para acessar?{" "}
-            <a
-              href="mailto:suporte@univesp-pi.com.br"
-              className="font-medium transition-colors hover:underline"
-              style={{ color: "#4A7C59" }}
-            >
-              Fale com o suporte
-            </a>
-          </p>
         </div>
       </div>
     </div>

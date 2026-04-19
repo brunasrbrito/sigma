@@ -2,12 +2,14 @@
 
 import Link from "next/link";
 import Image from "next/image";
+import { useRouter, usePathname } from "next/navigation";
+import { useState } from "react";
+import api from "@/services/api";
 
 const navItems = [
   {
-    label: "Dashboard",
+    label: "Início",
     href: "/dashboard",
-    active: true,
     icon: (
       <svg
         className="w-4 h-4"
@@ -25,8 +27,7 @@ const navItems = [
     ),
   },
   {
-    label: "Produtos",
-    href: "/dashboard/produtos",
+    label: "Madeiras",
     icon: (
       <svg
         className="w-4 h-4"
@@ -42,10 +43,10 @@ const navItems = [
         />
       </svg>
     ),
+    children: [{ label: "Cadastro", href: "/madeiras/cadastro" }],
   },
   {
     label: "Estoque",
-    href: "/dashboard/estoque",
     icon: (
       <svg
         className="w-4 h-4"
@@ -61,10 +62,17 @@ const navItems = [
         />
       </svg>
     ),
+    children: [
+      { label: "Visão Geral", href: "/estoque" },
+      {
+        label: "Nova Movimentação",
+        href: "/estoque/nova-movimentacao",
+      },
+      { label: "Movimentações", href: "/estoque/movimentacoes" },
+    ],
   },
   {
-    label: "Vendas",
-    href: "/dashboard/vendas",
+    label: "Administração",
     icon: (
       <svg
         className="w-4 h-4"
@@ -76,48 +84,19 @@ const navItems = [
         <path
           strokeLinecap="round"
           strokeLinejoin="round"
-          d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+          d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
         />
-      </svg>
-    ),
-  },
-  {
-    label: "Clientes",
-    href: "/dashboard/clientes",
-    icon: (
-      <svg
-        className="w-4 h-4"
-        fill="none"
-        viewBox="0 0 24 24"
-        stroke="currentColor"
-        strokeWidth={2}
-      >
         <path
           strokeLinecap="round"
           strokeLinejoin="round"
-          d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"
+          d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
         />
       </svg>
     ),
-  },
-  {
-    label: "Fornecedores",
-    href: "/dashboard/fornecedores",
-    icon: (
-      <svg
-        className="w-4 h-4"
-        fill="none"
-        viewBox="0 0 24 24"
-        stroke="currentColor"
-        strokeWidth={2}
-      >
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z"
-        />
-      </svg>
-    ),
+    children: [
+      { label: "Usuários", href: "/administracao/usuarios" },
+      { label: "Perfis", href: "/administracao/perfis" },
+    ],
   },
 ];
 
@@ -127,9 +106,38 @@ interface SidebarProps {
 }
 
 export default function Sidebar({ open, onClose }: SidebarProps) {
+  const router = useRouter();
+  const pathname = usePathname();
+
+  const [openMenus, setOpenMenus] = useState<string[]>(() => {
+    // abre automaticamente o submenu da rota atual
+    return navItems
+      .filter((item) =>
+        item.children?.some((child) => pathname.startsWith(child.href)),
+      )
+      .map((item) => item.label);
+  });
+
+  function toggleMenu(label: string) {
+    setOpenMenus((prev) =>
+      prev.includes(label) ? prev.filter((l) => l !== label) : [...prev, label],
+    );
+  }
+
+  async function logout(e: React.MouseEvent) {
+    e.preventDefault();
+    try {
+      await api.post("/api/auth/logout");
+    } catch (err) {
+      console.log(err);
+    }
+    localStorage.removeItem("user");
+    sessionStorage.clear();
+    router.replace("/");
+  }
+
   return (
     <>
-      {/* Overlay mobile */}
       {open && (
         <div
           className="fixed inset-0 z-20 bg-black/50 lg:hidden"
@@ -137,7 +145,6 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
         />
       )}
 
-      {/* Sidebar */}
       <aside
         className={`
           fixed inset-y-0 left-0 z-30 w-56 flex flex-col transition-transform duration-300
@@ -158,10 +165,9 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
             height={45}
             priority
           />
-          {/* Botão fechar no mobile */}
           <button
             onClick={onClose}
-            className="lg:hidden p-1 rounded-md transition-colors"
+            className="lg:hidden p-1 rounded-md"
             style={{ color: "rgba(245,241,230,0.50)" }}
           >
             <svg
@@ -181,40 +187,147 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
         </div>
 
         {/* Nav */}
-        <nav className="flex-1 px-3 py-4 space-y-0.5">
-          {navItems.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              onClick={onClose}
-              className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150"
-              style={
-                item.active
-                  ? { backgroundColor: "#2D6A4F", color: "#FFFFFF" }
-                  : { color: "rgba(245,241,230,0.60)" }
-              }
-              onMouseEnter={(e) => {
-                if (!item.active) {
-                  (e.currentTarget as HTMLElement).style.backgroundColor =
-                    "rgba(255,255,255,0.07)";
-                  (e.currentTarget as HTMLElement).style.color = "#F5F1E6";
-                }
-              }}
-              onMouseLeave={(e) => {
-                if (!item.active) {
-                  (e.currentTarget as HTMLElement).style.backgroundColor =
-                    "transparent";
-                  (e.currentTarget as HTMLElement).style.color =
-                    "rgba(245,241,230,0.60)";
-                }
-              }}
-            >
-              <span style={{ opacity: item.active ? 1 : 0.7 }}>
-                {item.icon}
-              </span>
-              {item.label}
-            </Link>
-          ))}
+        <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
+          {navItems.map((item) => {
+            const isActive = item.href ? pathname === item.href : false;
+            const isOpen = openMenus.includes(item.label);
+
+            // Item simples (sem filhos)
+            if (!item.children) {
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href!}
+                  onClick={onClose}
+                  className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150"
+                  style={
+                    isActive
+                      ? { backgroundColor: "#2D6A4F", color: "#FFFFFF" }
+                      : { color: "rgba(245,241,230,0.60)" }
+                  }
+                  onMouseEnter={(e) => {
+                    if (!isActive) {
+                      (e.currentTarget as HTMLElement).style.backgroundColor =
+                        "rgba(255,255,255,0.07)";
+                      (e.currentTarget as HTMLElement).style.color = "#F5F1E6";
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!isActive) {
+                      (e.currentTarget as HTMLElement).style.backgroundColor =
+                        "transparent";
+                      (e.currentTarget as HTMLElement).style.color =
+                        "rgba(245,241,230,0.60)";
+                    }
+                  }}
+                >
+                  <span style={{ opacity: isActive ? 1 : 0.7 }}>
+                    {item.icon}
+                  </span>
+                  {item.label}
+                </Link>
+              );
+            }
+
+            // Item com submenus
+            const hasActiveChild = item.children.some((child) =>
+              pathname.startsWith(child.href),
+            );
+
+            return (
+              <div key={item.label}>
+                <button
+                  onClick={() => toggleMenu(item.label)}
+                  className="w-full flex items-center justify-between gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150"
+                  style={
+                    hasActiveChild
+                      ? { color: "#F5F1E6" }
+                      : { color: "rgba(245,241,230,0.60)" }
+                  }
+                  onMouseEnter={(e) => {
+                    (e.currentTarget as HTMLElement).style.backgroundColor =
+                      "rgba(255,255,255,0.07)";
+                    (e.currentTarget as HTMLElement).style.color = "#F5F1E6";
+                  }}
+                  onMouseLeave={(e) => {
+                    (e.currentTarget as HTMLElement).style.backgroundColor =
+                      "transparent";
+                    (e.currentTarget as HTMLElement).style.color =
+                      hasActiveChild ? "#F5F1E6" : "rgba(245,241,230,0.60)";
+                  }}
+                >
+                  <span className="flex items-center gap-3">
+                    <span style={{ opacity: hasActiveChild ? 1 : 0.7 }}>
+                      {item.icon}
+                    </span>
+                    {item.label}
+                  </span>
+                  <svg
+                    className="w-3 h-3 transition-transform duration-200"
+                    style={{
+                      transform: isOpen ? "rotate(180deg)" : "rotate(0deg)",
+                    }}
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={2.5}
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M19 9l-7 7-7-7"
+                    />
+                  </svg>
+                </button>
+
+                {/* Submenus */}
+                {isOpen && (
+                  <div
+                    className="mt-0.5 ml-3 pl-4 space-y-0.5"
+                    style={{ borderLeft: "1px solid rgba(255,255,255,0.08)" }}
+                  >
+                    {item.children.map((child) => {
+                      const isChildActive = pathname === child.href;
+                      return (
+                        <Link
+                          key={child.href}
+                          href={child.href}
+                          onClick={onClose}
+                          className="flex items-center px-3 py-2 rounded-lg text-xs font-medium transition-all duration-150"
+                          style={
+                            isChildActive
+                              ? { backgroundColor: "#2D6A4F", color: "#FFFFFF" }
+                              : { color: "rgba(245,241,230,0.55)" }
+                          }
+                          onMouseEnter={(e) => {
+                            if (!isChildActive) {
+                              (
+                                e.currentTarget as HTMLElement
+                              ).style.backgroundColor =
+                                "rgba(255,255,255,0.07)";
+                              (e.currentTarget as HTMLElement).style.color =
+                                "#F5F1E6";
+                            }
+                          }}
+                          onMouseLeave={(e) => {
+                            if (!isChildActive) {
+                              (
+                                e.currentTarget as HTMLElement
+                              ).style.backgroundColor = "transparent";
+                              (e.currentTarget as HTMLElement).style.color =
+                                "rgba(245,241,230,0.55)";
+                            }
+                          }}
+                        >
+                          {child.label}
+                        </Link>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            );
+          })}
         </nav>
 
         {/* Sair */}
@@ -233,6 +346,7 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
               ((e.currentTarget as HTMLElement).style.color =
                 "rgba(245,241,230,0.45)")
             }
+            onClick={logout}
           >
             <svg
               className="w-4 h-4"

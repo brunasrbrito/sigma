@@ -1,7 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Sidebar from "@/components/ui/sidebar";
+
+interface User {
+  id: number;
+  name: string;
+  email: string;
+}
 
 interface DashboardClientProps {
   children: React.ReactNode;
@@ -15,6 +21,16 @@ export default function DashboardClient({
   subtitle,
 }: DashboardClientProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [user, setUser] = useState<User | null>(null);
+
+  // 🔥 pega usuário do localStorage
+  useEffect(() => {
+    const storedUser = localStorage.getItem("user");
+
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));
+    }
+  }, []);
 
   return (
     <div className="flex min-h-screen" style={{ backgroundColor: "#F5F1E6" }}>
@@ -31,7 +47,7 @@ export default function DashboardClient({
           }}
         >
           <div className="flex items-center gap-3">
-            {/* Botão hamburguer — só mobile */}
+            {/* Botão hamburguer */}
             <button
               onClick={() => setSidebarOpen(true)}
               className="lg:hidden p-2 rounded-lg transition-colors"
@@ -59,6 +75,7 @@ export default function DashboardClient({
               >
                 {title}
               </h1>
+
               {subtitle && (
                 <p className="text-xs mt-0.5" style={{ color: "#A89888" }}>
                   {subtitle}
@@ -67,26 +84,21 @@ export default function DashboardClient({
             </div>
           </div>
 
-          {/* Avatar */}
+          {/* Avatar / usuário */}
           <div className="flex items-center gap-3">
             <div className="text-right hidden sm:block">
               <p className="text-sm font-medium" style={{ color: "#2C1A0E" }}>
                 Bem-vindo
               </p>
+
               <p className="text-xs" style={{ color: "#A89888" }}>
-                Administrador
+                {user?.name || "Usuário"}
               </p>
-            </div>
-            <div
-              className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold text-white"
-              style={{ backgroundColor: "#2D6A4F" }}
-            >
-              A
             </div>
           </div>
         </header>
 
-        {/* Conteúdo da página */}
+        {/* Conteúdo */}
         <main className="flex-1 p-4 lg:p-8 space-y-8">{children}</main>
       </div>
     </div>
