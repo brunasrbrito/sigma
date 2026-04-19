@@ -72,7 +72,25 @@ Se a diferença ultrapassar 10%, a empresa está sujeita a:
 
 | Camada | Tecnologia |
 |---|---|
-| Frontend | Next.js |
-| Backend | NestJS |
-| Banco de dados | MySQL |
+| Frontend | Next.js (porta 3001) |
+| Backend | NestJS (porta 3000) |
+| Banco de dados | MySQL (TypeORM) |
 | Monorepo | pnpm workspaces |
+| Auth | JWT (access 15m + refresh 7d, cookies) |
+| E-mail | Resend (reset de senha) |
+
+---
+
+## Status do MVP (2026-04-19)
+
+| Módulo | Status |
+|---|---|
+| Auth (login, logout, refresh, reset senha) | Entregue |
+| CRUD de Usuários | Entregue |
+| CRUD de Perfis | Entregue |
+| CRUD de Produtos (Madeiras) | Entregue |
+| Dashboard (stub protegido) | Entregue |
+| Controle de Estoque (Lotes, Movimentações) | Planejado |
+| DOF / Divergência | Planejado |
+| Fornecedores | Planejado |
+| Relatórios / Exportação | Planejado |

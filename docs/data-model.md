@@ -4,33 +4,64 @@
 
 ---
 
-## Entidades
+## Status das Entidades
 
-### Especie (Espécie de Madeira)
-
-Representa um tipo de madeira registrada no DOF e no estoque.
-
-| Campo | Tipo | Descrição |
+| Entidade | Tabela | Status |
 |---|---|---|
-| id | int | PK |
-| tipo_madeira | string | Tipo do produto (ex: Madeira serrada (viga), Decking, Alisar) |
-| nome_cientifico | string | Nome científico (ex: Dipteryx odorata) |
-| nome_popular | string | Nome popular (ex: Cumaru, Cambará) |
+| `Profile` | `profiles` | Implementado |
+| `User` | `users` | Implementado |
+| `Product` | `products` | Implementado |
+| `Lote` | — | Planejado |
+| `LoteItem` | — | Planejado |
+| `Movimentacao` | — | Planejado |
+| `Desmembramento` | — | Planejado |
+| `Fornecedor` | — | Planejado |
 
 ---
 
-### Produto
+## Entidades Implementadas
 
-Combinação de espécie + dimensões fixas. Define uma "SKU" de madeira.
+### Profile
+
+Grupo de acesso (ex: administrador, vendedor). Criado dinamicamente pelo admin.
 
 | Campo | Tipo | Descrição |
 |---|---|---|
 | id | int | PK |
-| especie_id | int | FK → Especie |
-| altura_cm | decimal | Altura da seção transversal (cm) |
-| largura_cm | decimal | Largura da seção transversal (cm) |
-| comprimento_m | decimal | Comprimento padrão (m) |
-| volume_unitario_m3 | decimal | alt × larg × comp / 1.000.000 (m³) — calculado |
+| name | string | Nome único do perfil |
+
+---
+
+### User
+
+| Campo | Tipo | Descrição |
+|---|---|---|
+| id | int | PK |
+| name | string | Nome completo |
+| email | string | Único |
+| passwordHash | string | bcrypt |
+| active | boolean | Default true |
+| profileId | int | FK → Profile (nullable) |
+| resetToken | string | Token de reset de senha (nullable) |
+| resetTokenExpiry | timestamp | Expiração do token (nullable) |
+
+---
+
+### Product (Madeira/SKU)
+
+Unifica espécie + dimensões em um único cadastro. Não há tabela `Especie` separada no código atual.
+
+| Campo | Tipo | Descrição |
+|---|---|---|
+| id | int | PK |
+| wood_type | string | Tipo (ex: Madeira serrada, Decking) |
+| scientific_name | string | Nome científico (nullable) |
+| common_name | string | Nome popular (nullable) |
+| height_cm | decimal(10,2) | Altura da seção (cm) |
+| width_cm | decimal(10,2) | Largura da seção (cm) |
+| length_m | decimal(10,3) | Comprimento (m) |
+| unit_volume_m3 | decimal(10,6) | alt × larg × comp calculado |
+| active | boolean | Default true |
 
 ---
 

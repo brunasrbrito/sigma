@@ -6,7 +6,9 @@
 
 ## Visão Geral
 
-O sistema tem **dois perfis de acesso**. O escopo é **controle de estoque** — não inclui módulo de vendas completo nem cadastro de clientes na versão inicial.
+O sistema usa **Perfis dinâmicos** — o administrador cria os perfis no banco (tabela `profiles`). Os dois perfis esperados no MVP são `administrador` e `vendedor`, mas a estrutura é flexível.
+
+O escopo é **controle de estoque** — não inclui módulo de vendas completo nem cadastro de clientes na versão inicial.
 
 ---
 

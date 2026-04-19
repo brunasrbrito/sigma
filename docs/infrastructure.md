@@ -9,8 +9,8 @@ Deploy via Docker Compose com três serviços.
 | Serviço | Imagem / Build | Porta | Descrição |
 |---------|---------------|-------|-----------|
 | `mysql` | `mysql:8.4` | `3306` | Banco de dados relacional |
-| `api` | `apps/api/Dockerfile` | `3001` | Backend NestJS |
-| `web` | `apps/web/Dockerfile` | `3000` | Frontend Next.js |
+| `api` | `apps/api/Dockerfile` | `3000` | Backend NestJS |
+| `web` | `apps/web/Dockerfile` | `3001` | Frontend Next.js |
 
 ---
 
@@ -25,11 +25,21 @@ MYSQL_DATABASE=sigma
 MYSQL_USER=sigma
 MYSQL_PASSWORD=sigma
 
+# JWT (obrigatório — sem defaults)
+JWT_SECRET=troque-em-producao
+JWT_REFRESH_SECRET=troque-em-producao-refresh
+
+# E-mail (reset de senha via Resend)
+RESEND_API_KEY=re_xxxxxxxxxxxx
+
+# CORS — origem permitida pelo NestJS
+ALLOWED_ORIGIN=http://localhost:3001
+
 # API (usada pelo web)
-NEXT_PUBLIC_API_URL=http://localhost:3001
+NEXT_PUBLIC_API_URL=http://localhost:3000
 ```
 
-Os valores acima já são os defaults no `docker-compose.yml` — o `.env` só é necessário para sobrescrever em produção.
+Os valores de MySQL já são defaults no `docker-compose.yml`. As variáveis de JWT, Resend e ALLOWED_ORIGIN **são obrigatórias** e não têm defaults.
 
 ---
 
