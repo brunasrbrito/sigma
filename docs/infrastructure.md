@@ -66,7 +66,7 @@ docker compose down -v
 
 ## Ordem de inicialização
 
-```
+```text
 mysql (healthcheck) → api → web
 ```
 
@@ -77,3 +77,50 @@ O `api` aguarda o MySQL responder antes de iniciar. O `web` aguarda o `api` subi
 ## Dados persistidos
 
 O volume `mysql_data` persiste os dados do MySQL entre restarts. Para resetar o banco, use `docker compose down -v`.
+
+---
+
+## Homelab (produção)
+
+A API é publicada automaticamente no GitHub Container Registry via GitHub Actions a cada push em `master` que altere `apps/api/`.
+
+**Imagem:** `ghcr.io/marlondantas/sigma-api:latest`
+
+### Deploy no homelab
+
+```bash
+# Primeira vez — autenticar no ghcr.io
+echo $GITHUB_TOKEN | docker login ghcr.io -u marlondantas --password-stdin
+
+# Subir API + MySQL
+docker compose -f docker-compose.homelab.yml up -d
+
+# Atualizar para a última imagem
+docker compose -f docker-compose.homelab.yml pull api
+docker compose -f docker-compose.homelab.yml up -d api
+```
+
+### Variáveis obrigatórias no .env do homelab
+
+```env
+MYSQL_ROOT_PASSWORD=
+MYSQL_DATABASE=sigma
+MYSQL_USER=sigma
+MYSQL_PASSWORD=
+
+JWT_SECRET=
+JWT_REFRESH_SECRET=
+RESEND_API_KEY=
+ALLOWED_ORIGIN=https://seu-dominio-web.com
+```
+
+### Cloudflare Tunnel
+
+Exponha a porta `3001` via Cloudflare Tunnel. No Next.js (web), configure:
+
+```env
+API_URL=https://api.seu-tunnel.trycloudflare.com   # lido só server-side
+NEXT_PUBLIC_API_URL=/api                             # browser aponta pro proxy local
+```
+
+O Next.js já possui route handlers em `/app/api/` que fazem proxy para `API_URL`, eliminando CORS.

@@ -14,11 +14,11 @@ import { ProductsModule } from './products/products.module';
   imports: [
     TypeOrmModule.forRoot({
       type: 'mysql',
-      host: 'localhost',
-      port: 3306,
-      username: 'root',
-      password: 'p@ssw0rd',
-      database: 'sigma',
+      host: process.env.DB_HOST ?? 'localhost',
+      port: parseInt(process.env.DB_PORT ?? '3306'),
+      username: process.env.DB_USER ?? 'root',
+      password: process.env.DB_PASSWORD ?? 'root',
+      database: process.env.DB_NAME ?? 'sigma',
       entities: [__dirname + '/**/*.entity{.ts,.js}'],
       synchronize: true,
     }),
