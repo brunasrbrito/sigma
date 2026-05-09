@@ -19,12 +19,8 @@ import { DofModule } from './dof/dof.module';
 @Module({
   imports: [
     TypeOrmModule.forRoot({
-      type: 'mysql',
-      host: process.env.DB_HOST ?? 'localhost',
-      port: parseInt(process.env.DB_PORT ?? '3306'),
-      username: process.env.DB_USER ?? 'root',
-      password: process.env.DB_PASSWORD ?? 'root',
-      database: process.env.DB_NAME ?? 'sigma',
+      type: 'better-sqlite3',
+      database: process.env.DB_PATH ?? 'sigma.db',
       entities: [__dirname + '/**/*.entity{.ts,.js}'],
       synchronize: true,
     }),

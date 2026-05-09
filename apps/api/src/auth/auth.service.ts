@@ -19,7 +19,7 @@ export class AuthService {
     private jwtService: JwtService,
     private configService: ConfigService,
   ) {
-    this.resend = new Resend(this.configService.get<string>('RESEND_API_KEY'));
+    this.resend = new Resend(this.configService.get<string>('RESEND_API_KEY') ?? 'dev-placeholder');
   }
 
   // LOGIN

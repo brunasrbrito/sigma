@@ -27,7 +27,7 @@ export class User {
   @Column({ type: 'varchar', nullable: true, default: null })
   resetToken!: string | null;
 
-  @Column({ type: 'timestamp', nullable: true, default: null })
+  @Column({ type: 'datetime', nullable: true, default: null })
   resetTokenExpiry!: Date | null;
 
   @ManyToOne(() => Profile, { nullable: true, eager: true })

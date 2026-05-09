@@ -5,7 +5,8 @@
     "dev:web": "pnpm --filter web dev",
     "dev:api": "pnpm --filter api start:dev",
     "dev": "pnpm --parallel dev:web dev:api",
-    "build": "pnpm --recursive build"
+    "build": "pnpm --recursive build",
+    "test:api-flow": "pnpm --filter api exec node -r ts-node/register/transpile-only ../../scripts/test-api-flow.ts"
   },
   "engines": {
     "node": ">=20",

@@ -35,7 +35,7 @@ export class Lot {
   @Column({ nullable: true })
   createdById!: number | null;
 
-  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+  @Column({ type: 'datetime', default: () => 'CURRENT_TIMESTAMP' })
   createdAt!: Date;
 
   @OneToMany(() => LotItem, (item) => item.lot, {
