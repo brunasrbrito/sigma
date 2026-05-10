@@ -8,7 +8,13 @@ import {
   Post,
   Put,
 } from '@nestjs/common';
-import { ApiBody, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBody,
+  ApiOperation,
+  ApiParam,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { LotsService } from './lots.service';
 
 @ApiTags('lots')
@@ -24,7 +30,10 @@ export class LotsController {
       'Cada lote representa uma carga de madeira que entrou no estoque com um número de DOF associado. ' +
       'A resposta inclui os itens do lote (produtos e volumes) e os dados do fornecedor.',
   })
-  @ApiResponse({ status: 200, description: 'Array de lotes com itens e fornecedor.' })
+  @ApiResponse({
+    status: 200,
+    description: 'Array de lotes com itens e fornecedor.',
+  })
   findAll() {
     return this.lotsService.findAll();
   }
@@ -59,9 +68,17 @@ export class LotsController {
       type: 'object',
       required: ['dofNumber', 'supplierId', 'entryDate', 'items'],
       properties: {
-        dofNumber: { type: 'string', example: 'DOF-2026-00123', description: 'Número único do DOF' },
+        dofNumber: {
+          type: 'string',
+          example: 'DOF-2026-00123',
+          description: 'Número único do DOF',
+        },
         supplierId: { type: 'number', example: 1 },
-        entryDate: { type: 'string', example: '2026-05-07', description: 'Data de entrada (YYYY-MM-DD)' },
+        entryDate: {
+          type: 'string',
+          example: '2026-05-07',
+          description: 'Data de entrada (YYYY-MM-DD)',
+        },
         items: {
           type: 'array',
           minItems: 1,
@@ -70,16 +87,30 @@ export class LotsController {
             required: ['productId', 'quantity'],
             properties: {
               productId: { type: 'number', example: 1 },
-              quantity: { type: 'integer', example: 10, description: 'Quantidade de peças' },
+              quantity: {
+                type: 'integer',
+                example: 10,
+                description: 'Quantidade de peças',
+              },
             },
           },
         },
       },
     },
   })
-  @ApiResponse({ status: 201, description: 'Lote criado com itens e volumes calculados.' })
-  @ApiResponse({ status: 400, description: 'Dados inválidos (sem itens, campos obrigatórios ausentes, etc.).' })
-  @ApiResponse({ status: 404, description: 'Fornecedor ou produto referenciado não existe.' })
+  @ApiResponse({
+    status: 201,
+    description: 'Lote criado com itens e volumes calculados.',
+  })
+  @ApiResponse({
+    status: 400,
+    description:
+      'Dados inválidos (sem itens, campos obrigatórios ausentes, etc.).',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Fornecedor ou produto referenciado não existe.',
+  })
   @ApiResponse({ status: 409, description: 'Número de DOF já cadastrado.' })
   create(
     @Body()
@@ -104,9 +135,18 @@ export class LotsController {
   })
   @ApiParam({ name: 'id', description: 'ID numérico do lote' })
   @ApiResponse({ status: 200, description: 'Lote atualizado.' })
-  @ApiResponse({ status: 400, description: 'Lista de itens vazia ou dados inválidos.' })
-  @ApiResponse({ status: 404, description: 'Lote, fornecedor ou produto não encontrado.' })
-  @ApiResponse({ status: 409, description: 'Novo número de DOF já pertence a outro lote.' })
+  @ApiResponse({
+    status: 400,
+    description: 'Lista de itens vazia ou dados inválidos.',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Lote, fornecedor ou produto não encontrado.',
+  })
+  @ApiResponse({
+    status: 409,
+    description: 'Novo número de DOF já pertence a outro lote.',
+  })
   update(
     @Param('id', ParseIntPipe) id: number,
     @Body()
