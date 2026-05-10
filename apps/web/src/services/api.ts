@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_APP_URL,
+  baseURL: "/",
   withCredentials: true,
 });
 
@@ -20,11 +20,7 @@ api.interceptors.response.use(
       originalRequest._retry = true;
 
       try {
-        await axios.post(
-          `${process.env.NEXT_PUBLIC_APP_URL}/auth/refresh`,
-          {},
-          { withCredentials: true },
-        );
+        await axios.post("/api/auth/refresh", {}, { withCredentials: true });
 
         return api(originalRequest);
       } catch (err) {
