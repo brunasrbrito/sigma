@@ -74,7 +74,7 @@ Se a diferença ultrapassar 10%, a empresa está sujeita a:
 |---|---|
 | Frontend | Next.js (porta 3001) |
 | Backend | NestJS (porta 3000) |
-| Banco de dados | MySQL (TypeORM) |
+| Banco de dados | SQLite (TypeORM) |
 | Monorepo | pnpm workspaces |
 | Auth | JWT (access 15m + refresh 7d, cookies) |
 | E-mail | Resend (reset de senha) |

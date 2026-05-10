@@ -23,18 +23,16 @@ export class AuthService {
   }
 
   // LOGIN
-  async login(email: string, password: string) {
-    const user = await this.usersService.findByEmail(email);
+  // DEV MODE: aceita qualquer credencial sem validar no banco
+  async login(email: string, _password: string) {
+    // const user = await this.usersService.findByEmail(email);
+    // if (!user) throw new UnauthorizedException('Usuário não encontrado');
+    // const isMatch = await bcrypt.compare(password, user.passwordHash);
+    // if (!isMatch) throw new UnauthorizedException('Senha inválida');
 
-    if (!user) throw new UnauthorizedException('Usuário não encontrado');
-
-    const isMatch = await bcrypt.compare(password, user.passwordHash);
-    if (!isMatch) throw new UnauthorizedException('Senha inválida');
-
-    const payload = { sub: user.id, email: user.email };
-    const refreshSecret = this.configService.get<string>('JWT_REFRESH_SECRET');
-
-    if (!refreshSecret) throw new Error('JWT_REFRESH_SECRET não definido');
+    const payload = { sub: 'dev-user', email };
+    const refreshSecret =
+      this.configService.get<string>('JWT_REFRESH_SECRET') ?? 'dev-refresh-secret';
 
     return {
       access_token: this.jwtService.sign(payload, { expiresIn: '15m' }),
@@ -42,7 +40,7 @@ export class AuthService {
         expiresIn: '7d',
         secret: refreshSecret,
       }),
-      user: { id: user.id, name: user.name ?? null, email: user.email },
+      user: { id: 'dev-user', name: 'Dev User', email },
     };
   }
 

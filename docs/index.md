@@ -15,3 +15,7 @@ Navigation map for this project. Read this first — open other files only when 
 | [doc-assignments.md](doc-assignments.md) | Distribuição de tarefas de documentação entre os membros do grupo |
 | [api.md](api.md) | Referência completa dos endpoints REST — use ao implementar chamadas no frontend |
 | [implementation-map.md](implementation-map.md) | Mapa de implementação do frontend — blocos, ordem de execução e critérios de aceite |
+| [prompts/bloco-0-proxy.md](prompts/bloco-0-proxy.md) | Prompt completo para o agente implementar o proxy Next.js → Backend (Bloco 0) |
+| [prompts/bloco-1-dashboard.md](prompts/bloco-1-dashboard.md) | Prompt completo para o agente conectar o Dashboard à API real (Bloco 1) |
+| [prompts/visao-geral.md](prompts/visao-geral.md) | Visão geral do modelo — arquitetura, domínio, stack e convenções |
+| [prompts/session-memory.md](prompts/session-memory.md) | Memória de sessão — estado atual, blocos pendentes, como retomar |

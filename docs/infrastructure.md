@@ -8,7 +8,6 @@ Deploy via Docker Compose com três serviços.
 
 | Serviço | Imagem / Build | Porta | Descrição |
 |---------|---------------|-------|-----------|
-| `mysql` | `mysql:8.4` | `3306` | Banco de dados relacional |
 | `api` | `apps/api/Dockerfile` | `3000` | Backend NestJS |
 | `web` | `apps/web/Dockerfile` | `3001` | Frontend Next.js |
 
@@ -19,11 +18,8 @@ Deploy via Docker Compose com três serviços.
 Crie um `.env` na raiz do projeto baseado nos valores abaixo:
 
 ```env
-# MySQL
-MYSQL_ROOT_PASSWORD=root
-MYSQL_DATABASE=sigma
-MYSQL_USER=sigma
-MYSQL_PASSWORD=sigma
+# SQLite
+DATABASE_PATH=./sigma.db
 
 # JWT (obrigatório — sem defaults)
 JWT_SECRET=troque-em-producao
@@ -39,7 +35,7 @@ ALLOWED_ORIGIN=http://localhost:3001
 NEXT_PUBLIC_API_URL=http://localhost:3000
 ```
 
-Os valores de MySQL já são defaults no `docker-compose.yml`. As variáveis de JWT, Resend e ALLOWED_ORIGIN **são obrigatórias** e não têm defaults.
+As variáveis de JWT, Resend e ALLOWED_ORIGIN **são obrigatórias** e não têm defaults.
 
 ---
 
@@ -55,10 +51,10 @@ docker compose up -d --build
 # Ver logs
 docker compose logs -f
 
-# Derrubar (mantém volume do MySQL)
+# Derrubar (mantém arquivo SQLite)
 docker compose down
 
-# Derrubar e apagar dados do MySQL
+# Derrubar e apagar dados do SQLite
 docker compose down -v
 ```
 
@@ -67,16 +63,16 @@ docker compose down -v
 ## Ordem de inicialização
 
 ```text
-mysql (healthcheck) → api → web
+api → web
 ```
 
-O `api` aguarda o MySQL responder antes de iniciar. O `web` aguarda o `api` subir.
+O `web` aguarda o `api` subir.
 
 ---
 
 ## Dados persistidos
 
-O volume `mysql_data` persiste os dados do MySQL entre restarts. Para resetar o banco, use `docker compose down -v`.
+O arquivo SQLite é persistido via volume Docker entre restarts. Para resetar o banco, use `docker compose down -v`.
 
 ---
 
@@ -92,7 +88,7 @@ A API é publicada automaticamente no GitHub Container Registry via GitHub Actio
 # Primeira vez — autenticar no ghcr.io
 echo $GITHUB_TOKEN | docker login ghcr.io -u marlondantas --password-stdin
 
-# Subir API + MySQL
+# Subir API + Web
 docker compose -f docker-compose.homelab.yml up -d
 
 # Atualizar para a última imagem
@@ -103,10 +99,7 @@ docker compose -f docker-compose.homelab.yml up -d api
 ### Variáveis obrigatórias no .env do homelab
 
 ```env
-MYSQL_ROOT_PASSWORD=
-MYSQL_DATABASE=sigma
-MYSQL_USER=sigma
-MYSQL_PASSWORD=
+DATABASE_PATH=./sigma.db
 
 JWT_SECRET=
 JWT_REFRESH_SECRET=
